@@ -60,3 +60,58 @@ class Solution {
         return parent[x];
     }
 }
+
+// Approach : Prim's ALgorithm uses union heaps/priority queues to find the Minimum Spanning Tree (MST). They operate on undirected graphs.
+// First and foremost we need to form all the edges including pipes and wells (using n houses).
+// Time : O((N+M)⋅log(N+M))
+// Space : O(N+M)
+class Solution {
+    public int minCostToSupplyWater(int n, int[] wells, int[][] pipes) {
+
+        // collect all edges
+        List<int[]> edges = new ArrayList<>();
+
+        for(int[] pipe:pipes){
+            edges.add(pipe);
+        }
+
+        // digging a well between 0 and 1 house , 0 and 2 house , 0 and 3 house
+        for(int i=1;i<=n;i++){
+            edges.add(new int[]{0,i,wells[i-1]});
+        }
+
+        int result =0;
+
+        // In order to traverse over the graph we need an adjacency List
+        HashMap<Integer , List<int[]>> map = new HashMap<>();
+        for(int[] edge:edges){
+            map.putIfAbsent(edge[0],new ArrayList<>());
+            map.putIfAbsent(edge[1],new ArrayList<>()); // since it is a undirected graph so we need entried for both
+            map.get(edge[0]).add(new int[]{edge[1],edge[2]});
+            map.get(edge[1]).add(new int[]{edge[0],edge[2]});
+        }
+
+        PriorityQueue<int[]> pq = new PriorityQueue<>((a,b)->a[1]-b[1]);
+        pq.add(new int[]{0,0}); // need to start with well. represent well as 0 and cost of digging a well at 0 is $0 cost
+
+        boolean[] visited = new boolean[n+1];
+        while(!pq.isEmpty()){
+            int[] curr = pq.poll();
+            int node = curr[0];
+            int cost = curr[1];
+
+            if(visited[node]) continue;
+            visited[node] = true; // first time visiting  makr it as visited and incurr the cost
+            // we always get min weight first - since it is heaps
+            result+=cost;
+            
+            // go over all the neighbours - saved in map
+            for(int[] ne:map.get(node)){
+                pq.add(ne);
+            }
+        }
+
+        return result;
+
+    }
+}
